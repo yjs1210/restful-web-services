@@ -5,12 +5,16 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.in28minutes.rest.webservices.restfulwebservices.post.Post;
 
 
 
@@ -36,6 +40,16 @@ public class UserResource {
 		
 	}
 	
+	@GetMapping("/users/{id}/posts")
+	public List<Post> retrieveUserPosts(@PathVariable int id) {
+		User savedUser = service.findOne(id);
+		if (savedUser == null) {
+			throw new UserNotFoundException("id-" + id);
+		}
+		return savedUser.getPosts(); 
+		
+	}
+	
 	@PostMapping("/users")
 	public ResponseEntity<Object> createUser(@RequestBody User user) {
 		User savedUser = service.save(user);
@@ -49,5 +63,34 @@ public class UserResource {
 		
 		
 	}
+	
+	@DeleteMapping("/users/{id}")
+	public void deleteUser(@PathVariable int id) {
+		User savedUser = service.deleteById(id);
+		if (savedUser == null) {
+			throw new UserNotFoundException("id-" + id);
+		}
+	}
+	
+	
+	@PostMapping("/users/{id}/posts")
+	public ResponseEntity<Object> createUserPost(@PathVariable int id, @RequestBody Post post) {
+		User savedUser = service.findOne(id);
+		if (savedUser == null) {
+			throw new UserNotFoundException("id-" + id);
+		}
+		
+		savedUser.addPost(post);
+		
+		URI location = ServletUriComponentsBuilder
+			.fromCurrentRequest()
+			.path("/{post_id}")
+			.buildAndExpand(post.getId()).toUri();
+		
+		return ResponseEntity.created(location).build();
+		
+	}
+	
+	
 }
 

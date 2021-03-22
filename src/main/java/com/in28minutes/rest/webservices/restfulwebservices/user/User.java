@@ -13,9 +13,22 @@ public class User {
 	
 	private Date birthDate;
 	
+	private Integer postCount = 0;
+	
 	private List<Post> posts = new ArrayList<>();
 	
+	public List<Post> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(List<Post> posts) {
+		this.posts = posts;
+	}
+
 	public void addPost(Post post) {
+		if (post.getId()==null) {
+			post.setId(++postCount);
+		}
 		posts.add(post);
 	}
 	
